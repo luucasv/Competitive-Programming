@@ -29,10 +29,10 @@ struct node{
 		fr(i, 0, ms){
 			ans.a[i] = md(a[i] + p.a[i]);
 			fr(j, 0, ms){
-				ans.ab[i][j]   = md (md( md(a[i]*p.a[j]) + ab[i][j]) + p.ab[i][j]);
-				ans.abb[i][j]  = md (md( md( md(a[i]*p.ab[j][j]) + md(ab[i][j]*p.a[j])) + abb[i][j]) + p.abb[i][j]);
-				ans.bba[i][j]  = md (md( md( md(a[i]*p.ab[i][j]) + md(ab[i][i]*p.a[j])) + bba[i][j]) + p.bba[i][j]);
-				ans.abba[i][j] = md (md (md (md (md(a[i]*p.bba[j][i]) + md(ab[i][j]*p.ab[j][i])) + md(abb[i][j]*p.a[i])) + abba[i][j]) + p.abba[i][j]);
+				ans.ab[i][j]   = a[i]*p.a[j] + ab[i][j] + p.ab[i][j];
+				ans.abb[i][j]  = a[i]*p.ab[j][j] + ab[i][j]*p.a[j] + abb[i][j] + p.abb[i][j];
+				ans.bba[i][j]  = a[i]*p.ab[i][j] + ab[i][i]*p.a[j] + bba[i][j] + p.bba[i][j];
+				ans.abba[i][j] = a[i]*p.bba[j][i] + ab[i][j]*p.ab[j][i] + abb[i][j]*p.a[i] + abba[i][j] + p.abba[i][j];
 			}
 		}
 		return ans;
