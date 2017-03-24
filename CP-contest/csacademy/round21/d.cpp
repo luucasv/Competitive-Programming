@@ -4,42 +4,38 @@
 #define _ << " , " <<
 
 using namespace std;
-__int128 gera(int mask, int k){
-	__int128 ans = 0;
-	for(int i = 26; i > -1; --i){
-		ans *= 10;
-		if((mask >> i)&1){
-			ans += k;
+typedef pair<string, int> si;
+
+string memo[111111];
+int mark[111111];
+int n, k;
+
+
+string bfs(){
+	queue<si> fila;
+	fila.push(si(to_string(k), k%n));
+	while(1){
+		si tp = fila.front();
+		fila.pop();
+		if(tp.second == 0)
+			return tp.first;
+		int a = (tp.second*10)%n;
+		if(!mark[a]){
+			mark[a] = 1;
+			fila.push(si(tp.first + "0", a));
+		}
+		a = (tp.second*10 + k)%n;
+		if(!mark[a]){
+			mark[a] = 1;
+			fila.push(si(tp.first + char('0' + k), a));
 		}
 	}
-	return ans;
 }
 
-string show(__int128 a){
-	string ans = "";
-	unsigned long long fs = (a >> 64), ed = a;
-	if(fs)
-		ans += to_string(fs);
-	ans += to_string(ed);
-	return ans;
-}
-
-string solve(int n, int k){
-	fr(i, 1, (1 << 26)){
-		if(gera(i, k)%n == 0){
-			return show(gera(i, k));
-		}
-	}
-	return "0";
-}
 
 int main(){
 	ios::sync_with_stdio(0);
-	/*fr(i, 99999, 100000)
-		fr(j, 1, 10)
-			cout << i _ j _ solve(i, j) << endl;*/
-	int k, n;
 	cin >> n >> k;
-	cout << solve(n, k) << endl;
+	cout << bfs() << endl;
 	return 0;
 }
