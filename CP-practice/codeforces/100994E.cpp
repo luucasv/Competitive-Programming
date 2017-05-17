@@ -6,38 +6,33 @@
 #define dbg(x) cerr << ">>>> " << x << endl;
 #define _ << " , " <<
 
+#define X first
+#define Y second
+
 using namespace std;
 typedef long long ll;
-typedef pair<int, int> ii;
+typedef pair<ll, int> pli;
 
 const int ms = 111111;
 const ll inf = ll(1e15) + 10;
 
-ll a[ms], b[ms];
+pli a[ms], b[ms];
+ll ans[ms];
 
 struct node{
-	ll prefix, sufix, sum, minElem, maxSum;
-	bool valid;
+	ll prefix, sufix, sum, maxSum;
 	node(){
-		prefix = sufix = sum = minElem = maxSum = 0;
-		valid = false;
+		prefix = sufix = sum = maxSum = -inf;
 	}
 
 	node(ll a){
-		prefix = sufix = sum = minElem = maxSum = a;	
-		valid = true;
+		prefix = sufix = sum = maxSum = a;
 	}
 
 	node operator+(const node &a){
 		node ans;
-		if(!a.valid){
-			return *this;
-		}
-		if(!valid){
-			return a;
-		}
+		ans.prefix = max(prefix, sum + a.prefix);
 		ans.sufix = max(a.sufix, a.sum + sufix);
-		ans.minElem = min(minElem, ans.minElem);
 		ans.sum = max(sum + a.sum, -inf);
 		ans.maxSum = max(max(maxSum, a.maxSum), max(sufix + a.prefix, ans.sufix));
 		ans.maxSum = max(ans.maxSum, ans.prefix);
@@ -52,12 +47,18 @@ public:
 	seg_tree(vector<node> _vet){
 		vet = _vet;
 		n = vet.size();
-		st.assign(4*n, node(0, 1, true));
+		st.assign(4*n, node());
 		build(1, 0, n-1);
 	}
 
-	bool query(int i, int j){
-		return query(1, 0, n-1, i, j).maxSum;
+	void del(int i){
+		return del(1, 0, n-1, i);
+	}
+
+	ll maxSum(){
+		if(st[1].maxSum == -inf)
+			return 0;
+		return st[1].maxSum;
 	}
 private:
 	vector<node> st, vet;
@@ -75,17 +76,19 @@ private:
 		st[id] = st[L(id)] + st[R(id)];
 	}
 
-	node query(int id, int l, int r, int i, int j){
-		if(l > j || r < i)
-			return node(0, 1, true);
-		if(l >= i && r <= j){
-			// dbg(l _ r _ st[id].solvable)
-			return st[id];
+	void del(int id, int l, int r, int i){
+		if(l > i || r < i){
+			return;
 		}
+		if(l == r){
+			st[id] = node();
+			return;
+		}
+
 		int md = (l+r)/2;
-		node ret = query(L(id), l, md, i, j) + query(R(id), md+1, r, i, j);
-		// dbg(l _ r _ ret.solvable)
-		return ret;
+		del(L(id), l   , md, i);
+		del(R(id), md+1,  r, i);
+		st[id] = st[L(id)] + st[R(id)];
 	}
 
 };
@@ -97,10 +100,34 @@ int main(){
 	ios::sync_with_stdio(0);
 	int n, m;
 	cin >> n >> m;
-	fr(i, 0, n)
-		cin >> a[i];
-	fr(i, 0, m)
-		cin >> b[i];
+	vector<node> v(n);
+	fr(i, 0, n){
+		cin >> a[i].X;
+		a[i].Y = i;
+		v[i] = node(a[i].X);
+	}
+	fr(i, 0, m){
+		cin >> b[i].X;
+		b[i].Y = i;
+	}
+	
+	sort(a, a+n);
+	sort(b, b+m);
+	int aid = 0;
 
+	seg_tree seg(v);
+	fr(bid, 0, m){
+		while(aid < n && a[aid].X < b[bid].X){
+			seg.del(a[aid].Y);
+			++aid;
+		}
+
+		ans[b[bid].Y] =  seg.maxSum();
+	}
+
+	cout << ans[0];
+	fr(i, 1, m)
+		cout << " " << ans[i];
+	cout << endl;
 	return 0;
 }
