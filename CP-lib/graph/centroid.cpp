@@ -1,8 +1,3 @@
-/*
-	Centroid used to solve Codeforces 790B (791D)
-	> Doesn't build the tree <
-*/
-
 #include <bits/stdc++.h>
 #define fr(a, b, c) for(int a = b, __ = c; a < __; ++a)
 #define dbg(x) if(0) cerr << ">>> " << x << endl;
@@ -14,15 +9,25 @@ using namespace std;
 typedef long long ll;
 
 const int mv = int(2e5)+ 100, me = 2*mv;
-int ant[me], to[me], adj[mv], z;
+int ant[me], to[me], adj[mv], prox[me], z;
 inline void add(int a, int b){
-	ant[z] = adj[a], to[z] = b, adj[a] = z++;
+	ant[z] = adj[a], to[z] = b, adj[a] = z;
+	prox[ant[z]] = z, prox[z] = -1; ++z;
 	swap(a, b);
-	ant[z] = adj[a], to[z] = b, adj[a] = z++;
+	ant[z] = adj[a], to[z] = b, adj[a] = z;
+	prox[ant[z]] = z, prox[z] = -1; ++z;
 }
 
+inline void del(int i){
+	if(prox[i] == -1)
+		adj[to[i^1]] = ant[i];
+	else
+		ant[prox[i]] = ant[i];
+	if(ant[i] != -1)
+		prox[ant[i]] = prox[i];
+}
 
-int vis[mv], cent_mark[mv], size[mv], step;
+int vis[mv], size[mv], step;
 int max_down[mv], go[mv];
 ll cnt[mv][10], size2[mv];
 
@@ -35,7 +40,7 @@ void dfs(int u){
 	go[u] = u;
 	fre(i, u){
 		int v = to[i];
-		if(vis[v] == step || cent_mark[v])
+		if(vis[v] == step)
 			continue;
 		dfs(v);
 		size[u] += size[v];
@@ -59,11 +64,10 @@ ll calc(int u, int n, int d = 1){
 	vis[u] = step;
 	ll ans = 0;
 	fre(i, u){
-		if(cent_mark[to[i]] || vis[to[i]] == step) continue;
+		if(vis[to[i]] == step) continue;
 		ans += calc(to[i], n, d+1);
 	}
 	int a = (k - d%k)%k;
-	dbg(u _ n _ size[n]*((d+k-1)/k) _ a _ cnt[n][a])
 	ans += size2[n]*((d+k-1)/k) + cnt[n][a];
 	return ans;
 }
@@ -71,7 +75,7 @@ ll calc(int u, int n, int d = 1){
 void ins(int u, int n, int d = 1){
 	vis[u] = step;
 	fre(i, u){
-		if(cent_mark[to[i]] || vis[to[i]] == step) continue;
+		if(vis[to[i]] == step) continue;
 		ins(to[i], n, d+1);
 	}
 	fr(j, 0, k){
@@ -83,18 +87,19 @@ void ins(int u, int n, int d = 1){
 
 ll solve(int u){
 	u = get_centroid(u);
-	cent_mark[u] = 1;
 	size2[u] = 1;
 	ll ans = 0;
 	fre(i, u){
-		if(cent_mark[to[i]]) continue;
 		++step;
+		vis[u] = step;
 		ans += calc(to[i], u);
 		++step;
+		vis[u] = step;
 		ins(to[i], u);
 	}
 	fre(i, u){
-		if(cent_mark[to[i]]) continue;
+		del(i);
+		del(i^1);
 		ans += solve(to[i]);
 	}
 	return ans;
