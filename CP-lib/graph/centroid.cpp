@@ -3,7 +3,6 @@
 #define dbg(x) if(0) cerr << ">>> " << x << endl;
 #define _ << " , " <<
 #define fre(a, b) for(int a = adj[b]; a != -1; a = ant[a])
-#define frec(a, b) for(int a = cadj[b]; a != -1; a = cant[a])
 
 using namespace std;
 typedef long long ll;
@@ -27,22 +26,21 @@ inline void del(int i){
 		prox[ant[i]] = prox[i];
 }
 
-int vis[mv], size[mv], step;
+int size[mv];
 int max_down[mv], go[mv];
 ll cnt[mv][10], size2[mv];
 
 int n, k;
 
-void dfs(int u){
-	vis[u] = step;
+void dfs(int u, int p){
 	size[u] = 1;
 	max_down[u] = 0;
 	go[u] = u;
 	fre(i, u){
 		int v = to[i];
-		if(vis[v] == step)
+		if(v == p)
 			continue;
-		dfs(v);
+		dfs(v, u);
 		size[u] += size[v];
 		if(size[v] > max_down[u]){
 			max_down[u] = size[v];
@@ -52,31 +50,28 @@ void dfs(int u){
 }
 
 int get_centroid(int u){
-	++step;	
-	dfs(u);
+	dfs(u, u);
 	int sz = size[u]/2;
 	while(max_down[u] > sz)
 		u = go[u];
 	return u;
 }
 
-ll calc(int u, int n, int d = 1){
-	vis[u] = step;
+ll calc(int u, int p, int n, int d = 1){
 	ll ans = 0;
 	fre(i, u){
-		if(vis[to[i]] == step) continue;
-		ans += calc(to[i], n, d+1);
+		if(to[i] == p) continue;
+		ans += calc(to[i], u, n, d+1);
 	}
 	int a = (k - d%k)%k;
 	ans += size2[n]*((d+k-1)/k) + cnt[n][a];
 	return ans;
 }
 
-void ins(int u, int n, int d = 1){
-	vis[u] = step;
+void ins(int u, int p, int n, int d = 1){
 	fre(i, u){
-		if(vis[to[i]] == step) continue;
-		ins(to[i], n, d+1);
+		if(to[i] == p) continue;
+		ins(to[i], u, n, d+1);
 	}
 	fr(j, 0, k){
 		if(d > j)
@@ -90,12 +85,8 @@ ll solve(int u){
 	size2[u] = 1;
 	ll ans = 0;
 	fre(i, u){
-		++step;
-		vis[u] = step;
-		ans += calc(to[i], u);
-		++step;
-		vis[u] = step;
-		ins(to[i], u);
+		ans += calc(to[i], u, u);
+		ins(to[i], u, u);
 	}
 	fre(i, u){
 		del(i);
