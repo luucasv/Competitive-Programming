@@ -35,7 +35,7 @@ int dfs(int u, int p){
 	for(int i = adj[u]; i > -1; i = ant[i]){
 		if(to[i] == p || mk[to[i]] == step)
 			continue;
-		val[to[i]] = w[i];
+		val[to[i]] = w[i]; // como é por aresta, o valor do nó é o da aresta que liga para o pai
 		rep[i >> 1] = to[i];
 		level[to[i]] = level[u] + 1;
 		int sz = dfs(to[i], u);
@@ -77,6 +77,7 @@ void build(){
 	buildPath();
 }
 
+// LCA, usando o HLD
 int up(int u){
 	if(start[color[u]] != u)
 		return start[color[u]];

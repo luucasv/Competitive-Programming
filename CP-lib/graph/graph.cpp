@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
 
-#define scl(a) scanf("%I64d", &a)
+#define scl(a) scanf("%lld", &a)
 #define sc(a) scanf("%d", &a)
 #define sc2(a,b) scanf("%d%d", &a, &b)
 #define sc3(a,b,c) scanf("%d%d%d", &a, &b, &c)

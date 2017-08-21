@@ -3,28 +3,88 @@
 	O(nlog^2(n))
 */
 
-#include <bits/stdc++.h>
-#define fr(a, b, c) for(int a = b, __ = c; a < __; ++a)
-#define dbg(x) cerr << ">>>> " << x << endl;
-#define _ << " , " <<
+#include <string>
+#include <vector>
 
-using namespace std;
+struct Entry{
+	int prefix, suffix, id;
 
-struct entry{
-	int pre, suf, id;
-
-	entry(){}
-	entry(int a, int b, int id): pre(a), suf(b), id(id){}
-	bool operator< (entry p) const {
-		if(p.pre == pre)
-			return suf < p.suf;
-		return pre < p.pre;
+	Entry(){}
+	Entry(int prefix, int suffix, int id): prefix(prefix), suffix(suffix), id(id){}
+	bool operator<(Entry p) const {
+		if(p.prefix == this->prefix)
+			return this->suffix < p.suffix;
+		return this->prefix < p.prefix;
 	}
 
-	bool operator== (entry p) const {
-		return pre == p.pre && suf == p.suf;
+	bool operator==(Entry p) const {
+		return this->prefix == p.prefix && this->suffix == p.suffix;
+	}
+
+	bool operator!=(Entry p) const {
+		return !(*this == p);
 	}
 };
+
+class SuffixArray{
+public:
+	const int maxSteps;
+	std::vector<int> SA; // the suffix array 
+	std::vector<std::vector<int>> auxSA; // stores suffix array to every step
+	std::string T;
+	SuffixArray(std::string T):T(T), maxSteps( myLog2(T.size()) + 1 ){
+		auxSA = std::vector<std::vector<int>>(maxSteps, vector<int>(T.size()));
+		buildArray();
+	}
+
+private:
+	std::vector<Entry> countingSort(const std::vector<Entry>& vet){
+
+	}
+
+	void buildAuxVector(std::vector<Entry> &auxVector, const std::vector<int>& lastSA, int blockSize){
+		for(int i = 0; i < auxVector.size(); ++i){
+			int prefix = lastSA[i],
+			suffix = -1;
+			if(i + blockSize < lastSA.size())
+				suffix = lastSA[i + blockSize];
+
+			auxVector[i] = Entry(prefix, suffix, i);
+		}
+	}
+
+	void fillSAVector(std::vector<int>& curSA, const std::vector<Entry> &auxVector){
+		int rank = 0;
+		curSA[auxVector[i].id] = 0;
+		for(int i = 1; i < auxVector.size()){
+			if(auxVector[i] != auxVector[i-1])
+				rank++;
+			curSA[auxVector[i].id] = rank;
+		}
+	}
+
+	void buildArray(){
+		std::vector<Entry> auxVector(T.size());
+
+		for(int i = 0; i < T.size(); ++i){
+			auxSA[0][i] = T[i];
+		}
+
+		for(int step = 1; step < maxSteps; ++step){
+			int blockSize = pot2(step - 1);
+			buildAuxVector(auxVector, auxSA[step-1], blockSize);
+			auxVector = countingSort(auxVector);
+			fillSAVector(auxSA[step], auxVector);
+		}
+
+		SA = std::vector<int>(T.size());
+		for(int i = 0; i < T.size(); ++i){
+			SA[auxSA[maxSteps - 1][i]] = i;
+		}
+	}
+};
+
+
 
 const int ms = 2*100011, ml = 31;
 entry L[ms];
