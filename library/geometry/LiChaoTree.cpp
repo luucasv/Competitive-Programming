@@ -1,10 +1,10 @@
 typedef long long T;
-const T inf = 1e18;
+const T INF = 1e18, EPS = 1;
 
 struct Line {
   T m, b;
   
-  Line(T m = 0, T b = inf): m(m), b(b){}
+  Line(T m = 0, T b = INF): m(m), b(b){}
   T apply(T x) { return x * m + b; }
 };
 
@@ -20,9 +20,8 @@ struct Node {
 
 struct LiChaoTree {
   Node root;
-  const T EPS;
   T n;
-  LiChaoTree(T n, T EPS = 1): n(n), EPS(EPS) {}
+  LiChaoTree(T n): n(n) {}
   void insert_line(T m, T b) { update(&root, 0, n, Line(m, b)); }
   T eval(T x) { return query(&root, 0, n, x); }
   void update(Node *cur, T l, T r, Line line) {
@@ -44,12 +43,12 @@ struct LiChaoTree {
     }
   }
   T query(Node *cur, T l, T r, T x) {
-    if (cur == NULL) return inf;
+    if (cur == NULL) return INF;
     if (r - l <= EPS) {
       return cur->line.apply(x);
     }
     T m = (l + r) / 2;
-    T ans = inf;
+    T ans;
     if (x < m) {
       ans = query(cur->left, l, m, x);
     } else {
