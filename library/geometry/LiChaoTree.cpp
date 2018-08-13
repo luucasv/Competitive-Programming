@@ -1,5 +1,6 @@
 typedef long long T;
 const T INF = 1e18, EPS = 1;
+const int BUFFER_SIZE = 1e4;
 
 struct Line {
   T m, b;
@@ -12,18 +13,16 @@ struct Node {
   Node *left, *right;
   Line line;
   Node(): left(NULL), right(NULL) {}
-  ~Node() {
-    if (left) delete left;
-    if (right) delete right;
-  }
 };
 
 struct LiChaoTree {
-  Node root;
+  Node *root, buffer[BUFFER_SIZE];
   T n;
-  LiChaoTree(T n): n(n) {}
-  void insert_line(T m, T b) { update(&root, 0, n, Line(m, b)); }
-  T eval(T x) { return query(&root, 0, n, x); }
+  int buffer_pointer;
+  LiChaoTree(T n): n(n) { clear(); }
+  void clear() { buffer_pointer = 0; root = newNode(); }
+  void insert_line(T m, T b) { update(root, 0, n, Line(m, b)); }
+  T eval(T x) { return query(root, 0, n, x); }
   void update(Node *cur, T l, T r, Line line) {
     T m = (l + r) / 2;
     bool left = line.apply(l) < cur->line.apply(l);
@@ -35,10 +34,10 @@ struct LiChaoTree {
     if (r - l <= EPS) return;
     if (left == right) return;
     if (mid != left) {
-      if (cur->left == NULL) cur->left = new Node();
+      if (cur->left == NULL) cur->left = newNode();
       update(cur->left, l, m, line);
     } else {
-      if (cur->right == NULL) cur->right = new Node();
+      if (cur->right == NULL) cur->right = newNode();
       update(cur->right, m, r, line);
     }
   }
@@ -55,5 +54,9 @@ struct LiChaoTree {
       ans = query(cur->right, m, r, x);
     }
     return min(ans, cur->line.apply(x));
+  }
+  Node* newNode() {
+      buffer[buffer_pointer] = Node();
+      return &buffer[buffer_pointer++];
   }
 };
