@@ -9,6 +9,7 @@ struct Line {
   T apply(T x) { return x * m + b; }
 };
 
+
 struct Node {
   Node *left, *right;
   Line line;
@@ -17,14 +18,14 @@ struct Node {
 
 struct LiChaoTree {
   Node *root, buffer[BUFFER_SIZE];
-  T n;
+  T min_value, max_value;
   int buffer_pointer;
-  LiChaoTree(T n): n(n) { clear(); }
+  LiChaoTree(T min_value, T max_value): min_value(min_value), max_value(max_value + 1) { clear(); }
   void clear() { buffer_pointer = 0; root = newNode(); }
-  void insert_line(T m, T b) { update(root, 0, n, Line(m, b)); }
-  T eval(T x) { return query(root, 0, n, x); }
+  void insert_line(T m, T b) { update(root, min_value, max_value, Line(m, b)); }
+  T eval(T x) { return query(root, min_value, max_value, x); }
   void update(Node *cur, T l, T r, Line line) {
-    T m = (l + r) / 2;
+    T m = l + (r - l) / 2;
     bool left = line.apply(l) < cur->line.apply(l);
     bool mid = line.apply(m) < cur->line.apply(m);
     bool right = line.apply(r) < cur->line.apply(r);
@@ -46,7 +47,7 @@ struct LiChaoTree {
     if (r - l <= EPS) {
       return cur->line.apply(x);
     }
-    T m = (l + r) / 2;
+    T m = l + (r - l) / 2;
     T ans;
     if (x < m) {
       ans = query(cur->left, l, m, x);
